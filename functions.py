@@ -1,6 +1,9 @@
 from configparser import ConfigParser
-import httpx
+# import httpx
+import requests
 from selectolax.parser import HTMLParser
+
+from data_classes import PlayerData
 
 
 def load_config(file):
@@ -14,6 +17,27 @@ def load_config(file):
 
 
 
+def get_player_urls(url: str) -> list:
+   html = requests.get(url)
+   parse = HTMLParser(html.text)
+   
+   #initial empty list
+   player_data_list = []
+   # get table body 
+   tbody = parse.css_first("tbody")
+   tbody_players = tbody.css("th[data-stat=player]")
+   for player in tbody_players:
+      _player_a = player.css_first("a")
+      player_name = _player_a.text()
+      player_url = _player_a.attributes['href']
+      player_data = PlayerData(player_name, player_url)
+      player_data_list.append(player_data)
+
+   return player_data_list
+
+
+
+   
 
 
 
