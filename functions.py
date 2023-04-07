@@ -15,9 +15,10 @@ def load_config(file):
    
    return config
 
+def page_url_get(baseURL, charList):
+   return [f"{baseURL}{char}" for char in charList]   
 
-
-def get_player_urls(url: str) -> list:
+def get_players_data(url: str) -> list:
    html = requests.get(url)
    parse = HTMLParser(html.text)
    
@@ -25,15 +26,49 @@ def get_player_urls(url: str) -> list:
    player_data_list = []
    # get table body 
    tbody = parse.css_first("tbody")
-   tbody_players = tbody.css("th[data-stat=player]")
-   for player in tbody_players:
-      _player_a = player.css_first("a")
-      player_name = _player_a.text()
-      player_url = _player_a.attributes['href']
-      player_data = PlayerData(player_name, player_url)
-      player_data_list.append(player_data)
+   player_data = tbody.css("th[data-stat=player]")
+   year_min_data = tbody.css("td[data-stat=year_min]")
+   year_max_data = tbody.css("td[data-stat=year_max]")
+   pos_data = tbody.css("td[data-stat=pos]")
+   height_data = tbody.css("td[data-stat=height]")
+   weight_data = tbody.css("td[data-stat=weight]")
+
+   for (_player,
+        _yearmi,
+        _yearmx, 
+        _pos,
+        _height, 
+        _weight
+    ) in zip(player_data,
+             year_min_data,
+             year_max_data,
+             pos_data,
+             height_data,
+             weight_data
+             ):
+         _player_a = _player.css_first("a")
+         player_name = _player_a.text()
+         player_url = _player_a.attributes['href']
+         yearmi = _yearmi.text()
+         yearmx = _yearmx.text()
+         pos = _pos.text()
+         height = _height.text()
+         weight = _weight.text()
+
+         player_data = PlayerData(player_url,
+                                  player_name,
+                                  yearmi,
+                                  yearmx,
+                                  pos,
+                                  height,
+                                  weight)
+         player_data_list.append(player_data)
 
    return player_data_list
+   
+
+
+
 
 
 

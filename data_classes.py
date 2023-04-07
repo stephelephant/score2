@@ -2,6 +2,13 @@ from dataclasses import dataclass
 
 @dataclass
 class PlayerData:
-    name: str
     url: str
+    name: str
+    year_min: int
+    year_max: int
+    pos: str
+    height: int
+    weight: int
+
+
 
