@@ -1,10 +1,8 @@
 from configparser import ConfigParser
-# import httpx
-import requests
+import urllib3
 from selectolax.parser import HTMLParser
-
 from data_classes import PlayerData
-
+import requests
 
 def load_config(file):
    config = ConfigParser()
@@ -19,7 +17,15 @@ def page_url_get(baseURL, charList):
    return [f"{baseURL}{char}" for char in charList]   
 
 def get_players_data(url: str) -> list:
-   html = requests.get(url)
+   try:
+      html = requests.get(url)
+   except Exception as e:
+      print(f"could not get {url}:" + str(e))
+
+   if html.status_code != 200:
+      print(f"Status code not 200 for {url}")
+      return []
+   
    parse = HTMLParser(html.text)
    
    #initial empty list
