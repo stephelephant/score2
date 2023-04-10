@@ -1,5 +1,6 @@
-from functions import load_config, get_players_data, open_pool_manager, page_url_get
-
+from functions import load_config, get_players_data, open_pool_manager, page_url_gen
+import requests
+from urllib.request import Request
 config = load_config('.settings.ini')
 
 
@@ -11,21 +12,21 @@ def main():
     
 
     # get URL list
-    url_list = page_url_get(b_url, charList)
+    url_list = page_url_gen(b_url, charList)
 
     pd_list =[]
-    pm = open_pool_manager()
-
+    
     for url in url_list:
+        
         try:
             print(f"trying url: " + str(url))
-            pd = get_players_data(pm, url)
+            pd = get_players_data(session, url)
             pd_list.append(pd)
         except Exception as e:
             print("could not get data for" + str(url))
             pass
     
-    pm.clear()
+    
 
     
         

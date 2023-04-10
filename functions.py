@@ -1,8 +1,8 @@
 from configparser import ConfigParser
-from urllib3 import PoolManager
+from urllib.request import urlopen, Request
 from selectolax.parser import HTMLParser
 from data_classes import PlayerData
-import requests
+
 
 def load_config(file):
    config = ConfigParser()
@@ -14,24 +14,13 @@ def load_config(file):
    return config
 
 
-def open_pool_manager():
-   try:
-      http = PoolManager(num_pools=50)
-   except Exception as e:
-      print("could not open pool mgr :" +str(e))
-   return http
-
-
-def page_url_get(baseURL, charList):
-   return [f"{baseURL}{char}" for char in charList]   
-
-
-def get_players_data(pm: PoolManager, url: str) -> list:
-
+def get_players_data(session: Session, url: str) -> list:
    
    try:
       print(f"trying {url} with {str(pm)}")
-      html = pm.request('GET', url)
+      html = urlopen(url).read()
+      print(str(html.status))
+      print("the # of pools are: " + str(len(pm.pools)))
    except Exception as e:
       print(f"could not get {url}:" + str(e))
 
@@ -39,8 +28,8 @@ def get_players_data(pm: PoolManager, url: str) -> list:
 
       print(f"Status code not 200 for {url}{html.status}")
       return []
-   
-   parse = HTMLParser(html.data)
+   with session as ses:
+      parse = HTMLParser(html.data)
    
    #initial empty list
    player_data_list = []
@@ -83,11 +72,15 @@ def get_players_data(pm: PoolManager, url: str) -> list:
                                   height,
                                   weight)
          player_data_list.append(player_data)
+   
+   
    print("success")
    return player_data_list
    
 
 
+def page_url_gen(baseURL, charList):
+   return [f"{baseURL}{char}" for char in charList]   
 
 
 def importPlayerData(txt):
