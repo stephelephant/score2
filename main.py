@@ -1,4 +1,4 @@
-from functions import load_config, get_players_data
+from functions import load_config, get_players_data, open_pool_manager, page_url_get
 
 config = load_config('.settings.ini')
 
@@ -9,21 +9,30 @@ def main():
     b_url = getplayers_cfg['baseURL']
     charList = getplayers_cfg['charList']
     
-    list_s =[]
-    for char in charList:
-        
-        url = f"{b_url}{char}"
 
+    # get URL list
+    url_list = page_url_get(b_url, charList)
+
+    pd_list =[]
+    pm = open_pool_manager()
+
+    for url in url_list:
         try:
-            ttt = get_players_data(url)
-        except AttributeError as ae:
-            print("error occured with :" + str(ae) + str(ae))
-            print(str(url))
-            
+            print(f"trying url: " + str(url))
+            pd = get_players_data(pm, url)
+            pd_list.append(pd)
+        except Exception as e:
+            print("could not get data for" + str(url))
             pass
-        list_s.append(ttt)
+    
+    pm.clear()
 
-    flat_list_s = [pData for subList in list_s for pData in subList]
+    
+        
+
+
+    
+    flat_list_s = [pData for subList in pd_list for pData in subList]
 
 
     return flat_list_s

@@ -1,5 +1,5 @@
 from configparser import ConfigParser
-import urllib3
+from urllib3 import PoolManager
 from selectolax.parser import HTMLParser
 from data_classes import PlayerData
 import requests
@@ -13,20 +13,34 @@ def load_config(file):
    
    return config
 
+
+def open_pool_manager():
+   try:
+      http = PoolManager(num_pools=50)
+   except Exception as e:
+      print("could not open pool mgr :" +str(e))
+   return http
+
+
 def page_url_get(baseURL, charList):
    return [f"{baseURL}{char}" for char in charList]   
 
-def get_players_data(url: str) -> list:
+
+def get_players_data(pm: PoolManager, url: str) -> list:
+
+   
    try:
-      html = requests.get(url)
+      print(f"trying {url} with {str(pm)}")
+      html = pm.request('GET', url)
    except Exception as e:
       print(f"could not get {url}:" + str(e))
 
-   if html.status_code != 200:
-      print(f"Status code not 200 for {url}")
+   if html.status != 200:
+
+      print(f"Status code not 200 for {url}{html.status}")
       return []
    
-   parse = HTMLParser(html.text)
+   parse = HTMLParser(html.data)
    
    #initial empty list
    player_data_list = []
@@ -69,14 +83,52 @@ def get_players_data(url: str) -> list:
                                   height,
                                   weight)
          player_data_list.append(player_data)
-
+   print("success")
    return player_data_list
    
 
 
 
 
+def importPlayerData(txt):
 
+   data_list = []
+   with open(txt, 'r') as file:
+      datalines = file.readlines()
+   
+   for entry in datalines:
+      urlstart = entry.find("'")
+      urlend = entry.find("'", urlstart+1)
+      url = entry[urlstart+1:urlend]
+
+      namestart = entry.find("'",urlend+1)
+      nameend = entry.find("'", namestart+1)
+      name = entry[namestart+1:nameend]
+
+      minStart = entry.find("'",nameend+1)
+      minEnd = entry.find("'", minStart+1)
+      min = entry[minStart+1:minEnd]
+
+      maxStart = entry.find("'", minEnd+1)
+      maxEnd = entry.find("'", maxStart+1)
+      max = entry[maxStart+1:maxEnd]
+
+      posStart = entry.find("'", maxEnd+1)
+      posEnd = entry.find("'", posStart+1)
+      pos = entry[posStart+1:posEnd]
+
+      htStart = entry.find("'", posEnd+1)
+      htEnd = entry.find("'", htStart+1)
+      ht = entry[htStart+1:htEnd]
+
+      wtStart = entry.find("'", htEnd+1)
+      wtEnd = entry.find("'", wtStart+1)
+      wt = entry[wtStart+1:wtEnd]
+
+      pd = PlayerData(url, name, min, max, pos, ht, wt)
+      data_list.append(pd)
+   
+   return data_list
 
    
 
