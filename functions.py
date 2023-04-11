@@ -81,7 +81,6 @@ def get_players_data(url: str) -> list:
    return player_data_list
    
 
-
 def page_url_gen(baseURL, charList):
    return [f"{baseURL}{char}" for char in charList]   
 
