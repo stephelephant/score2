@@ -14,13 +14,16 @@ def load_config(file):
    return config
 
 
-def get_players_data(session: Session, url: str) -> list:
+def get_players_data(url: str) -> list:
    
    try:
-      print(f"trying {url} with {str(pm)}")
-      html = urlopen(url).read()
-      print(str(html.status))
-      print("the # of pools are: " + str(len(pm.pools)))
+      print(f"{url}")
+      r = Request(url, headers={"User-Agent": "Mozilla/5.0"})
+      
+      with urlopen(r) as html:
+         print(html.status)
+         read_html = html.read()
+      
    except Exception as e:
       print(f"could not get {url}:" + str(e))
 
@@ -28,8 +31,8 @@ def get_players_data(session: Session, url: str) -> list:
 
       print(f"Status code not 200 for {url}{html.status}")
       return []
-   with session as ses:
-      parse = HTMLParser(html.data)
+   
+   parse = HTMLParser(read_html)
    
    #initial empty list
    player_data_list = []
@@ -83,7 +86,7 @@ def page_url_gen(baseURL, charList):
    return [f"{baseURL}{char}" for char in charList]   
 
 
-def importPlayerData(txt):
+def importPlayerData(txt: str) -> list:
 
    data_list = []
    with open(txt, 'r') as file:
