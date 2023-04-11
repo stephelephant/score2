@@ -125,11 +125,6 @@ def importPlayerData(txt: str) -> list:
    
    return data_list
 
-   
-
-
-
-
 
 
 
