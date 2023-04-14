@@ -4,33 +4,27 @@ from selectolax.parser import HTMLParser
 from data_classes import PlayerData
 
 
+
 def load_config(file):
+
    config = ConfigParser()
-   try:
-      config.read(file)
-   except Exception as e:
-      print("Could not read settings file: " + str(e))
-   
+
+   config.read(file)
+
    return config
 
 
 def get_players_data(url: str) -> list:
+
+   # r = Request(url, headers={"User-Agent": "Mozilla/5.0"})
    
-   try:
-      print(f"{url}")
-      r = Request(url, headers={"User-Agent": "Mozilla/5.0"})
-      
-      with urlopen(r) as html:
-         print(html.status)
-         read_html = html.read()
-      
-   except Exception as e:
-      print(f"could not get {url}:" + str(e))
+   html = urlopen(url)
+   status = html.status
 
-   if html.status != 200:
-
-      print(f"Status code not 200 for {url}{html.status}")
-      return []
+   if status == 200:
+      read_html = html.read().decode('utf8')
+   else:
+      return None
    
    parse = HTMLParser(read_html)
    
